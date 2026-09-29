@@ -83,7 +83,7 @@ jobs:
         with:
           install_args: cargo:mdbook
 
-      - run: mise run docs
+      - run: mdbook build docs
 
   security:
     name: Security / Dependencies and licenses
@@ -100,7 +100,7 @@ jobs:
         with:
           install_args: aqua:EmbarkStudios/cargo-deny
 
-      - run: mise run security
+      - run: cargo deny check
 
   android:
     name: Android / Test and lint
