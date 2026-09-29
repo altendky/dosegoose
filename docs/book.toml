@@ -1,0 +1,8 @@
+[book]
+authors = ["Dose Goose contributors"]
+language = "en"
+src = "src"
+title = "Dose Goose"
+
+[build]
+build-dir = "book"

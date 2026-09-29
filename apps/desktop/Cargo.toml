@@ -1,0 +1,17 @@
+[package]
+name = "dosegoose-simulator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Desktop simulator and development harness for Dose Goose"
+publish = false
+
+[dependencies]
+dosegoose.workspace = true
+eframe.workspace = true
+
+[lints]
+workspace = true

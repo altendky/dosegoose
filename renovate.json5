@@ -1,0 +1,47 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "rebaseWhen": "conflicted",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "pre-commit": {
+    "enabled": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^rust-toolchain\\.toml$/"],
+      "matchStrings": ["channel\\s*=\\s*\"(?<currentValue>\\d+\\.\\d+)\""],
+      "depNameTemplate": "rust-lang/rust",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^(?<version>\\d+\\.\\d+)\\.\\d+$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^Cargo\\.toml$/"],
+      "matchStrings": ["rust-version\\s*=\\s*\"(?<currentValue>\\d+\\.\\d+)\""],
+      "depNameTemplate": "rust-lang/rust",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^(?<version>\\d+\\.\\d+)\\.\\d+$"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["rust-lang/rust"],
+      "groupName": "Rust toolchain"
+    },
+    {
+      "matchDepNames": ["github:nextest-rs/nextest"],
+      "extractVersion": "^cargo-nextest-(?<version>.+)$"
+    },
+    {
+      "matchManagers": ["mise"],
+      "postUpgradeTasks": {
+        "commands": ["mise lock {{{depName}}}"],
+        "fileFilters": ["mise.lock"],
+        "executionMode": "update"
+      }
+    }
+  ]
+}

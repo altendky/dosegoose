@@ -1,0 +1,3 @@
+[bindings.kotlin]
+package_name = "net.fstab.dosegoose.uniffi"
+cdylib_name = "dosegoose_uniffi"

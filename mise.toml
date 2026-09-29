@@ -1,0 +1,46 @@
+[settings]
+locked = true
+http_timeout = "120s"
+
+[tools]
+python = "3.14.7"
+"pipx:pre-commit" = "4.6.2"
+"aqua:EmbarkStudios/cargo-deny" = "0.20.2"
+"github:nextest-rs/nextest" = { version = "0.9.144", version_prefix = "cargo-nextest-" }
+"cargo:mdbook" = "0.5.4"
+"cargo:cargo-ndk" = "4.1.2"
+"cargo:lychee" = "0.24.2"
+"aqua:taiki-e/cargo-llvm-cov" = "0.6.14"
+
+[tasks.fmt]
+description = "Check Rust formatting"
+run = "cargo fmt --all --check"
+
+[tasks.clippy]
+description = "Check all Rust targets and features with Clippy"
+run = "cargo clippy --workspace --all-targets --all-features -- -D warnings"
+
+[tasks.test]
+description = "Run the Rust test suite"
+run = "cargo nextest run --workspace --all-features --no-tests=pass"
+
+[tasks.coverage]
+description = "Enforce strong portable-core test coverage"
+run = "cargo llvm-cov -p dosegoose --tests --summary-only --fail-under-functions 95 --fail-under-lines 95 --fail-under-regions 95"
+
+[tasks.docs]
+description = "Build the project documentation"
+run = "mdbook build docs"
+
+[tasks.security]
+description = "Check Rust dependencies and licenses"
+run = "cargo deny check"
+
+[tasks.check]
+description = "Run the local validation suite"
+depends = ["fmt", "clippy", "test", "coverage", "docs", "security"]
+
+[tasks.android]
+description = "Build and validate the Android application and Rust bridge"
+dir = "apps/android"
+run = "./gradlew test lint assembleDebug assembleDebugAndroidTest"
