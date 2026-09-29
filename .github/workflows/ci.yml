@@ -127,9 +127,10 @@ jobs:
       - name: Install Android SDK and NDK
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
         with:
-          packages: platform-tools platforms;android-37 build-tools;37.0.0 ndk;30.0.16248370
+          cmdline-tools-version: '16111833'
+          packages: platform-tools platforms;android-37.0 build-tools;37.0.0 ndk;30.0.16248370
 
-      # APK assembly stays in the shared-debug-keystore build workflow.
+      # APK assembly requires the shared debug keystore and remains outside CI.
       - working-directory: apps/android
         run: ./gradlew --no-daemon test lint
 
