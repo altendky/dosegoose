@@ -7,7 +7,7 @@ python = "3.14.7"
 uv = "0.12.21"
 "pipx:pre-commit" = "4.6.2"
 "aqua:EmbarkStudios/cargo-deny" = "0.20.2"
-"github:nextest-rs/nextest" = { version = "0.9.144", version_prefix = "cargo-nextest-" }
+"github:nextest-rs/nextest" = { version = "0.9.146", version_prefix = "cargo-nextest-" }
 "cargo:mdbook" = "0.5.4"
 "cargo:cargo-ndk" = "4.1.2"
 "cargo:lychee" = "0.24.2"
