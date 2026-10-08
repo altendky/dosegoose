@@ -4,7 +4,7 @@ http_timeout = "120s"
 
 [tools]
 python = "3.14.8"
-uv = "0.12.23"
+uv = "0.12.24"
 "pipx:pre-commit" = "4.6.2"
 "aqua:EmbarkStudios/cargo-deny" = "0.20.2"
 "github:nextest-rs/nextest" = { version = "0.9.146", version_prefix = "cargo-nextest-" }
