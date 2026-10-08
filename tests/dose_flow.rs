@@ -61,14 +61,14 @@ fn apply(state: &mut DoseState, event: Event) -> Result<Vec<Effect>, Rejection> 
 fn due_time_starts_quiet_presentation_only_once() -> Result<(), Box<dyn std::error::Error>> {
     let mut state = initial_state()?;
 
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ObserveTime {
                 now: timestamp(999)
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(
         apply(&mut state, Event::ObserveTime { now: SCHEDULED })?,
@@ -87,7 +87,10 @@ fn due_time_starts_quiet_presentation_only_once() -> Result<(), Box<dyn std::err
     assert!(state.presentation().quiet_visible());
     assert!(!state.presentation().intrusive_visible());
     assert_eq!(state.guidance(SCHEDULED), DoseGuidance::Due);
-    assert!(apply(&mut state, Event::ObserveTime { now: SCHEDULED })?.is_empty());
+    assert_eq!(
+        apply(&mut state, Event::ObserveTime { now: SCHEDULED })?,
+        [] as [Effect; 0]
+    );
     Ok(())
 }
 
@@ -95,14 +98,14 @@ fn due_time_starts_quiet_presentation_only_once() -> Result<(), Box<dyn std::err
 fn intrusive_presentation_requires_accepted_activity() -> Result<(), Box<dyn std::error::Error>> {
     let mut inactive = initial_state()?;
     apply(&mut inactive, Event::ObserveTime { now: SCHEDULED })?;
-    assert!(
+    assert_eq!(
         apply(
             &mut inactive,
             Event::ObserveTime {
                 now: timestamp(1_001)
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
 
     assert_eq!(
@@ -119,14 +122,14 @@ fn intrusive_presentation_requires_accepted_activity() -> Result<(), Box<dyn std
     );
 
     let mut active_before_due = initial_state()?;
-    assert!(
+    assert_eq!(
         apply(
             &mut active_before_due,
             Event::AcceptActivity {
                 now: timestamp(900)
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(
         apply(
@@ -192,14 +195,14 @@ fn snooze_preserves_activity_and_intrusive_presentation_resumes()
         }
     );
     assert_eq!(state.snoozed_until(), Some(timestamp(1_320)));
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ObserveTime {
                 now: timestamp(1_319)
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(
         apply(
@@ -265,14 +268,14 @@ fn only_an_authorized_foreground_action_returns_to_inactivity()
     );
     assert_eq!(state.activity(), ActivityState::Inactive);
     assert!(state.presentation().quiet_visible());
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ObserveTime {
                 now: timestamp(1_030)
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     Ok(())
 }
@@ -288,25 +291,25 @@ fn dismissing_reminders_never_records_intake() -> Result<(), Box<dyn std::error:
         },
     )?;
 
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::DismissReminder {
                 now: timestamp(1_020),
                 kind: ReminderKind::Quiet,
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::DismissReminder {
                 now: timestamp(1_020),
                 kind: ReminderKind::Intrusive,
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(state.intake(), None);
     assert_eq!(
