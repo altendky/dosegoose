@@ -93,7 +93,7 @@ fn every_rejection_has_a_nonempty_display_message() {
     ];
 
     for rejection in rejections {
-        assert!(!rejection.to_string().is_empty());
+        assert_ne!(rejection.to_string(), "");
     }
 }
 
@@ -197,7 +197,7 @@ fn rejected_transition_parts_retain_time_driven_state() -> Result<(), Box<dyn st
         outcome,
         EventOutcome::Rejected(Rejection::LateWindowElapsed)
     );
-    assert!(effects.is_empty());
+    assert_eq!(effects, [] as [dosegoose::Effect; 0]);
     assert_eq!(
         state.recording_availability(Timestamp::from_unix_seconds(110)),
         RecordingAvailability::LateWindowElapsed

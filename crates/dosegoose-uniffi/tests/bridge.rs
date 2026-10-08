@@ -342,7 +342,7 @@ fn record_rejections_are_typed_and_keep_replacement_snapshots()
         )?;
         assert!(!result.accepted);
         assert_eq!(result.rejection, Some(expected));
-        assert!(!result.snapshot_json.is_empty());
+        assert_ne!(result.snapshot_json, "");
     }
     Ok(())
 }

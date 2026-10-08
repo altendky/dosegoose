@@ -353,7 +353,7 @@ fn record_is_rejected_before_due() -> Result<(), Box<dyn std::error::Error>> {
     );
     assert_eq!(transition.state().last_observed_at(), Some(timestamp(999)));
     assert_eq!(transition.state().intake(), None);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -371,7 +371,7 @@ fn snooze_is_rejected_before_due() -> Result<(), Box<dyn std::error::Error>> {
     );
     assert_eq!(transition.state().last_observed_at(), Some(timestamp(999)));
     assert_eq!(transition.state().snoozed_until(), None);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -394,7 +394,7 @@ fn rejected_action_advances_only_the_watermark() -> Result<(), Box<dyn std::erro
         Some(timestamp(1_100))
     );
     assert_eq!(state.last_observed_at(), None);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -418,7 +418,7 @@ fn unauthorized_record_advances_watermark_without_recording()
     );
     assert_eq!(transition.state().intake(), None);
     assert_eq!(transition.state().activity(), ActivityState::Inactive);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -481,7 +481,7 @@ fn authorization_rejection_precedes_already_recorded() -> Result<(), Box<dyn std
         transition.state().last_observed_at(),
         Some(timestamp(1_200))
     );
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -495,14 +495,14 @@ fn duplicate_activity_evidence_is_idempotent() -> Result<(), Box<dyn std::error:
         },
     )?;
 
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::AcceptActivity {
                 now: timestamp(1_200),
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(
         state.activity(),
@@ -563,7 +563,7 @@ fn direct_jump_to_expiration_is_terminal_without_presenting()
     let transition = state.transition(Event::ObserveTime { now: EXPIRES });
 
     assert_eq!(transition.outcome(), EventOutcome::Accepted);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     assert_eq!(
         transition.state().recording_availability(DEADLINE),
         RecordingAvailability::LateWindowElapsed
@@ -579,14 +579,14 @@ fn repeated_expiration_is_idempotent() -> Result<(), Box<dyn std::error::Error>>
     apply(&mut state, Event::ObserveTime { now: SCHEDULED })?;
     apply(&mut state, Event::ObserveTime { now: EXPIRES })?;
 
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ObserveTime {
                 now: timestamp(1_700),
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(
         state.recording_availability(DEADLINE),
@@ -619,7 +619,7 @@ fn snooze_after_recording_is_rejected_without_changing_intake()
     );
     assert_eq!(transition.state().intake(), intake);
     assert_eq!(transition.state().snoozed_until(), None);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -641,7 +641,7 @@ fn snooze_after_expiration_is_rejected_and_keeps_expiration_terminal()
         RecordingAvailability::LateWindowElapsed
     );
     assert_eq!(transition.state().snoozed_until(), None);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -649,25 +649,25 @@ fn snooze_after_expiration_is_rejected_and_keeps_expiration_terminal()
 fn dismissing_an_invisible_reminder_is_idempotent() -> Result<(), Box<dyn std::error::Error>> {
     let mut state = initial_state()?;
 
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::DismissReminder {
                 now: timestamp(900),
                 kind: ReminderKind::Quiet,
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::DismissReminder {
                 now: timestamp(900),
                 kind: ReminderKind::Intrusive,
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert!(!state.presentation().quiet_visible());
     assert!(!state.presentation().intrusive_visible());
@@ -746,15 +746,15 @@ fn authorized_reset_is_idempotent_while_already_inactive() -> Result<(), Box<dyn
 {
     let mut state = initial_state()?;
 
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ReturnToInactive {
                 now: timestamp(900),
                 authorization: AUTHORIZED,
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert_eq!(state.activity(), ActivityState::Inactive);
     Ok(())
@@ -787,14 +787,14 @@ fn reset_while_snoozed_clears_snooze_and_prevents_restart() -> Result<(), Box<dy
 
     assert_eq!(state.activity(), ActivityState::Inactive);
     assert_eq!(state.snoozed_until(), None);
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ObserveTime {
                 now: timestamp(1_300),
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     assert!(!state.presentation().intrusive_visible());
     Ok(())
@@ -856,14 +856,14 @@ fn recorded_guidance_is_stable_for_all_query_times() -> Result<(), Box<dyn std::
     assert_eq!(state.guidance(timestamp(i64::MIN)), expected);
     assert_eq!(state.guidance(timestamp(1_300)), expected);
     assert_eq!(state.guidance(timestamp(i64::MAX)), expected);
-    assert!(
+    assert_eq!(
         apply(
             &mut state,
             Event::ObserveTime {
                 now: timestamp(1_400),
             }
-        )?
-        .is_empty()
+        )?,
+        [] as [Effect; 0]
     );
     Ok(())
 }
@@ -982,7 +982,7 @@ fn authorized_reset_after_recording_is_the_only_activity_reset()
     assert_eq!(transition.outcome(), EventOutcome::Accepted);
     assert_eq!(transition.state().activity(), ActivityState::Inactive);
     assert_eq!(transition.state().intake(), intake);
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -1001,7 +1001,7 @@ fn authorized_reset_after_expiration_is_the_only_activity_reset()
         transition.state().recording_availability(DEADLINE),
         RecordingAvailability::LateWindowElapsed
     );
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
@@ -1026,7 +1026,7 @@ fn record_after_expiration_is_rejected_without_losing_terminal_state()
         transition.state().recording_availability(DEADLINE),
         RecordingAvailability::LateWindowElapsed
     );
-    assert!(transition.effects().is_empty());
+    assert_eq!(transition.effects(), [] as [Effect; 0]);
     Ok(())
 }
 
