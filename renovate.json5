@@ -31,6 +31,12 @@
       "matchDepNames": ["rust-lang/rust"],
       "groupName": "Rust toolchain"
     },
+    // MSRV is a deliberate compatibility policy, not a routine toolchain update.
+    {
+      "matchDepNames": ["rust-lang/rust"],
+      "matchFileNames": ["Cargo.toml"],
+      "enabled": false
+    },
     {
       "matchDepNames": ["github:nextest-rs/nextest"],
       "extractVersion": "^cargo-nextest-(?<version>.+)$"
