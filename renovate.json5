@@ -26,7 +26,43 @@
       "extractVersionTemplate": "^(?<version>\\d+\\.\\d+)\\.\\d+$"
     }
   ],
+  // Preserve recommended exclusions and ignore generated Mise package metadata.
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
+    "**/.mise/locks/**"
+  ],
+
   "packageRules": [
+    {
+      "description": "Keep Python on the selected minor release",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchDepNames": [
+        "python"
+      ],
+      "allowedVersions": "/^3\\.14(?:\\.|$)/"
+    },
+    {
+      "description": "Keep the Java build runtime on JDK 21",
+      "matchManagers": [
+        "mise",
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "java",
+        "java-jdk"
+      ],
+      "allowedVersions": "/^21(?:\\.|$)/"
+    },
+
     {
       "matchDepNames": ["rust-lang/rust"],
       "groupName": "Rust toolchain"

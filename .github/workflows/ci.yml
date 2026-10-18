@@ -48,6 +48,24 @@ jobs:
 
       - run: pre-commit run --show-diff-on-failure --color=always --all-files
 
+  msrv:
+    name: Rust / Minimum supported version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Read minimum supported Rust version
+        id: msrv
+        run: python3 -c 'import tomllib; print("version=" + tomllib.load(open("Cargo.toml", "rb"))["workspace"]["package"]["rust-version"])' >> "$GITHUB_OUTPUT"
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2
+        with:
+          toolchain: ${{ steps.msrv.outputs.version }}
+      - name: Check minimum supported Rust version
+        env:
+          MSRV: ${{ steps.msrv.outputs.version }}
+        run: cargo +"$MSRV" check --locked --workspace --all-targets --all-features
+
   rust:
     runs-on: ubuntu-latest
     steps:
@@ -137,7 +155,7 @@ jobs:
   all:
     name: all
     if: ${{ !cancelled() }}
-    needs: [mise, repository, rust, docs, security, android]
+    needs: [mise, repository, msrv, rust, docs, security, android]
     runs-on: ubuntu-latest
     steps:
       - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # release/v1
