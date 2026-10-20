@@ -155,10 +155,10 @@ url_api = "https://api.github.com/repos/nextest-rs/nextest/releases/assets/62060
 provenance = "github-attestations"
 
 [[tools."pipx:pre-commit"]]
-version = "4.6.2"
+version = "4.7.0"
 backend = "pipx:pre-commit"
-specifiers = ["4.6.2"]
-uv = { path = ".mise/locks/pipx-pre-commit/4.6.2", digest = "sha256:9a4ce96083175168531422473e9df8a8fdaaa02ab69b4754b9d8e0c367a19c34" }
+specifiers = ["4.7.0"]
+uv = { path = ".mise/locks/pipx-pre-commit/4.7.0", digest = "sha256:79a872aa21163abb1c0f4e458e462cbbe7c35a429e500b90588bc8e5643f3cf1" }
 
 [[tools.python]]
 version = "3.14.8"
