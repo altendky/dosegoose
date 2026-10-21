@@ -11,8 +11,13 @@ project-operated server.
   content so a locked screen need not expose medication names.
 - Android requests the Physical activity permission only when the user chooses
   to enable live activity evidence from Settings. Google Play services performs
-  walking/running transition and sleep classification; Dose Goose retains no
-  raw sensor samples or classification history. It stores a device-level
+  walking/running transition and sleep classification. Temporary continuous
+  walking/running monitoring retains transition history and processing outcomes
+  locally, with original event timestamps, receipt times, boot count, and
+  callback-time charging state. Four app-private rotating files capped at 1 MiB
+  each bound the history; the oldest files are discarded, and all are excluded
+  from backup. No raw sensor samples or sleep classification history are stored.
+  Dose Goose also stores a device-level
   accepted-activity latch, its projection into actionable dose state, and only
   the timestamps needed to evaluate the configured two-hour overnight sleep
   policy.

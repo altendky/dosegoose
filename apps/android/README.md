@@ -20,16 +20,48 @@ the early-taking window opens, while
 high-importance alarm-style notifications are reconciled from durable core
 state after the early-taking window opens and activity is accepted. AlarmManager restores
 early, due, late-window, snooze, and midnight evaluation
-after process death or reboot. While an inactive dose is available, Google Play
-services supplies low-power walking/running transitions; accepted evidence can
-start the intrusive reminder. Physical activity permission is opt-in from
-Settings, raw sensor data is not retained, and regular due reminders remain
+after process death or reboot. With Physical activity permission, Google Play
+services continuously supplies low-power walking/running transitions for local
+diagnostics. Evidence changes reminder state only while an inactive dose is
+available. Physical activity permission is opt-in from Settings, raw sensor data
+is not retained, and regular due reminders remain
 available without it. After activity has been accepted, two hours of sustained
 high-confidence sleep evidence inside the configurable overnight window clears
 the device activity latch for later occurrences. It never silences an alarm
 already in progress and intentionally does not treat daytime naps as bedtime.
 Notification content is private on the lock screen and
 is not bridged to companion devices.
+
+## Activity diagnostics
+
+Every delivered walking/running ENTER and EXIT is retained, including complete
+event batches, original elapsed-realtime timestamps, callback wall and elapsed
+times, boot count, callback-time charging status/power source, and processing
+outcomes. This can distinguish a brief false detection from sustained activity
+and reveal delayed delivery. EXIT does not reset the accepted-activity latch.
+
+The app-private `no_backup/activity-diagnostics/` directory contains JSONL files:
+`transitions.0.jsonl` is current, followed by `.1`, `.2`, and `.3` from newer to
+older. Each file is capped at 1 MiB; rotation discards the oldest history, so
+there is no guaranteed number of days retained. Files survive process death and
+updates and are excluded from backup. Storage failure is reported to logcat and
+does not prevent reminder processing.
+
+For a connected debug installation, read retained history without launching or
+changing the app:
+
+```console
+adb shell run-as net.fstab.dosegoose ls no_backup/activity-diagnostics
+adb exec-out run-as net.fstab.dosegoose cat no_backup/activity-diagnostics/transitions.0.jsonl
+```
+
+`activity_type` and `transition_type` use Google Play services numeric constants
+(walking 7, running 8; ENTER 0, EXIT 1). Match receipt and processing records by
+`batch_id`. Use event and receipt elapsed timestamps only within the same
+`boot_count`; charging fields describe delivery time, not the historical event.
+Continuous monitoring is temporary diagnostic instrumentation to be revisited
+once sufficient false-positive evidence is available; see
+[issue #64](https://github.com/altendky/dosegoose/issues/64).
 
 ## Build
 

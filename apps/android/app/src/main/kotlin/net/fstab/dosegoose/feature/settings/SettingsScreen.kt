@@ -210,11 +210,11 @@ fun SettingsScreen(
 private fun activityEvidenceDescription(readiness: ActivityEvidenceReadiness): String =
     when (readiness) {
         ActivityEvidenceReadiness.PermissionRequired ->
-            "Permission is needed to detect walking or running while a dose is available."
+            "Permission is needed for walking/running evidence and continuous transition diagnostics."
         ActivityEvidenceReadiness.Ready ->
-            "Ready. Detection starts only while an available dose needs activity evidence."
+            "Ready to monitor walking/running transitions and retain local diagnostics."
         ActivityEvidenceReadiness.Monitoring ->
-            "Monitoring for a walking or running transition for an available dose."
+            "Continuously monitoring walking/running transitions. A bounded diagnostic history stays on this device."
         ActivityEvidenceReadiness.Unavailable ->
             "Unavailable on this device. Regular due reminders will continue to work."
         ActivityEvidenceReadiness.RegistrationFailed ->
