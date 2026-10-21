@@ -37,30 +37,26 @@ class ActivityEvidenceManager(private val context: Context) : ActivityEvidenceMo
     private val mutableStatus = MutableStateFlow(currentIdleStatus())
     val status: StateFlow<ActivityEvidenceStatus> = mutableStatus
 
-    private var monitoringRequired = false
     private var requestGeneration = 0
 
-    @Synchronized
     override fun setMonitoringRequired(required: Boolean) {
-        monitoringRequired = required
+        // Keep collecting diagnostic ENTER and EXIT events after acceptance.
+        // ReminderCoordinator still gates changes to reminder state.
+        refresh()
+    }
+
+    @Synchronized
+    fun refresh() {
         requestGeneration += 1
         val generation = requestGeneration
         val idleStatus = currentIdleStatus()
         if (idleStatus != ActivityEvidenceStatus.Ready) {
             mutableStatus.value = idleStatus
-            if (!required) removeUpdates(generation)
-            return
-        }
-        if (!required) {
-            mutableStatus.value = ActivityEvidenceStatus.Ready
-            removeUpdates(generation)
             return
         }
 
         requestUpdates(generation)
     }
-
-    fun refresh() = setMonitoringRequired(monitoringRequired)
 
     fun permissionGranted(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
         ContextCompat.checkSelfPermission(
@@ -71,15 +67,6 @@ class ActivityEvidenceManager(private val context: Context) : ActivityEvidenceMo
     @Synchronized
     private fun updateStatus(generation: Int, newStatus: ActivityEvidenceStatus) {
         if (generation == requestGeneration) mutableStatus.value = newStatus
-    }
-
-    private fun removeUpdates(generation: Int) {
-        if (!playServicesAvailable()) return
-        try {
-            removeUpdatesWithPermission(generation)
-        } catch (_: SecurityException) {
-            updateStatus(generation, ActivityEvidenceStatus.PermissionRequired)
-        }
     }
 
     @SuppressLint("MissingPermission")
@@ -96,17 +83,6 @@ class ActivityEvidenceManager(private val context: Context) : ActivityEvidenceMo
         } catch (_: SecurityException) {
             updateStatus(generation, ActivityEvidenceStatus.PermissionRequired)
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun removeUpdatesWithPermission(generation: Int) {
-        ActivityRecognition.getClient(context)
-            .removeActivityTransitionUpdates(callbackPendingIntent())
-            .addOnFailureListener {
-                if (monitoringRequired) {
-                    updateStatus(generation, ActivityEvidenceStatus.RegistrationFailed)
-                }
-            }
     }
 
     private fun currentIdleStatus(): ActivityEvidenceStatus = when {

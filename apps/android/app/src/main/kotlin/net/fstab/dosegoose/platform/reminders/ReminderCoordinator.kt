@@ -82,9 +82,16 @@ class ReminderCoordinator(
             result
         }
 
-    suspend fun acceptActivityEvidence(): Int = mutex.withLock {
+    suspend fun acceptActivityEvidence(beforeAcceptance: suspend () -> Unit = {}): Int = mutex.withLock {
         val reconciliation = repository.reconcile()
-        val acceptedCount = repository.acceptActivityEvidence()
+        // Diagnostic callbacks must not refresh an active latch or accept
+        // activity outside an actionable medication window.
+        val acceptedCount = if (repository.reminderState().activityMonitoringRequired) {
+            beforeAcceptance()
+            repository.acceptActivityEvidence()
+        } else {
+            0
+        }
         synchronize(reconciliation.nextBoundaryEpochSeconds)
         acceptedCount
     }

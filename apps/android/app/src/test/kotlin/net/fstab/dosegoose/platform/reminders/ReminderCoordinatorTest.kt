@@ -55,20 +55,65 @@ class ReminderCoordinatorTest {
         val store = FakeStore(
             occurrences = listOf(
                 occurrence("due", enabled = true, quiet = true, intrusive = true)
-                    .copy(activityAccepted = true, recordingAvailable = true),
+                    .copy(recordingAvailable = true),
             ),
         )
         val platform = FakePlatform()
         val monitor = FakeActivityMonitor()
 
-        val count = ReminderCoordinator(store, platform, monitor).acceptActivityEvidence()
+        var sleepCandidateCleared = false
+        val count = ReminderCoordinator(store, platform, monitor).acceptActivityEvidence {
+            sleepCandidateCleared = true
+        }
 
         assertEquals(1, count)
         assertEquals(1, store.reconcileCount)
         assertEquals(1, store.activityEvidenceCount)
+        assertTrue(sleepCandidateCleared)
         assertEquals(listOf(false), monitor.requirements)
         assertTrue(platform.events.contains("show-intrusive:due:false"))
     }
+
+    @Test
+    fun `continuous enter callbacks do not refresh an active latch or clear sleep evidence`() =
+        runBlocking {
+            val store = FakeStore(
+                occurrences = listOf(
+                    occurrence("due", enabled = true, quiet = true, intrusive = true)
+                        .copy(activityAccepted = true),
+                ),
+            ).apply { deviceIsActive = true }
+            var sleepCandidateCleared = false
+
+            val count = ReminderCoordinator(store, FakePlatform()).acceptActivityEvidence {
+                sleepCandidateCleared = true
+            }
+
+            assertEquals(0, count)
+            assertEquals(0, store.activityEvidenceCount)
+            assertEquals(false, sleepCandidateCleared)
+            assertTrue(store.deviceIsActive)
+        }
+
+    @Test
+    fun `continuous enter callbacks outside medication windows remain diagnostic only`() =
+        runBlocking {
+            val store = FakeStore(
+                occurrences = listOf(
+                    occurrence("future", enabled = true, quiet = false, intrusive = false),
+                ),
+            )
+            var sleepCandidateCleared = false
+
+            val count = ReminderCoordinator(store, FakePlatform()).acceptActivityEvidence {
+                sleepCandidateCleared = true
+            }
+
+            assertEquals(0, count)
+            assertEquals(0, store.activityEvidenceCount)
+            assertEquals(false, sleepCandidateCleared)
+            assertEquals(false, store.deviceIsActive)
+        }
 
     @Test
     fun `synchronization enables detection only when inactive due activity is needed`() =
@@ -429,6 +474,8 @@ class ReminderCoordinatorTest {
 
         override suspend fun acceptActivityEvidence(): Int {
             activityEvidenceCount += 1
+            deviceIsActive = true
+            occurrences = occurrences.map { it.copy(activityAccepted = true) }
             return 1
         }
 
@@ -450,7 +497,7 @@ class ReminderCoordinatorTest {
             futureEvaluations = evaluations,
             pendingEffectCutoffId = 42,
             pendingIntrusiveAlertIds = pendingIntrusiveAlertIds,
-            activityMonitoringRequired = occurrences.any {
+            activityMonitoringRequired = !deviceIsActive && occurrences.any {
                 it.enabled && it.recordingAvailable && !it.activityAccepted
             },
             sleepMonitoringRequired = deviceIsActive,

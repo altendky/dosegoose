@@ -135,9 +135,12 @@
   applies it only to enabled, recordable, still-inactive occurrences whose
   early-taking window has opened.
   Exit transitions never reset portable activity state.
-- Android activity recognition is demand-driven and gracefully degrades to
-  regular due reminders when permission or compatible Google Play services are
-  unavailable. Raw activity events are not retained.
+- Android continuously subscribes to walking/running transitions temporarily to
+  diagnose false activity triggers, while reminder acceptance remains limited
+  to actionable inactive doses. It retains bounded app-private transition
+  diagnostics (up to 4 MiB), including EXITs, timestamps, charging state, and
+  processing outcomes; raw sensor samples are not retained. Missing permission
+  or compatible Google Play services still degrades to regular due reminders.
 - Android uses classification-only Google Play services Sleep API events while
   the device activity latch is active. The initial sleep policy requires two
   hours of high-confidence evidence inside a configurable overnight window
@@ -146,7 +149,8 @@
   not handle daytime naps.
 - Confirmed sleep clears only the Android device activity latch and never
   rewrites an already-active portable occurrence. A subsequent walking/running
-  transition clears any unfinished sleep candidate and can activate later
+  transition accepted for an actionable inactive dose clears any unfinished sleep
+  candidate and can activate later
   actionable occurrences. Sleep evidence at or before the latest accepted
   activity is stale and cannot clear the latch. Only policy progress and a
   processed-event watermark are retained; raw sleep classifications are not

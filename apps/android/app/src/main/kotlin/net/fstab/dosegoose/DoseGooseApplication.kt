@@ -2,6 +2,7 @@ package net.fstab.dosegoose
 
 import android.app.Application
 import android.content.BroadcastReceiver
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,6 +16,7 @@ import net.fstab.dosegoose.corebridge.UniFFIDoseCoreBridge
 import net.fstab.dosegoose.platform.AndroidForegroundAuthorizationProvider
 import net.fstab.dosegoose.platform.SystemPlatformTimeSource
 import net.fstab.dosegoose.platform.activity.ActivityEvidenceManager
+import net.fstab.dosegoose.platform.activity.ActivityDiagnosticLog
 import net.fstab.dosegoose.platform.reminders.AndroidReminderPlatform
 import net.fstab.dosegoose.platform.reminders.ReminderCoordinator
 import net.fstab.dosegoose.platform.sleep.SleepEvidenceManager
@@ -39,6 +41,9 @@ class DoseGooseApplication : Application() {
     val activityEvidenceManager: ActivityEvidenceManager by lazy {
         ActivityEvidenceManager(this)
     }
+    val activityDiagnosticLog: ActivityDiagnosticLog by lazy {
+        ActivityDiagnosticLog(File(noBackupFilesDir, "activity-diagnostics"))
+    }
     val sleepEvidenceManager: SleepEvidenceManager by lazy {
         SleepEvidenceManager(this)
     }
@@ -54,6 +59,7 @@ class DoseGooseApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         reminderCoordinator.initializeChannels()
+        activityEvidenceManager.refresh()
     }
 
     fun runReminderWork(

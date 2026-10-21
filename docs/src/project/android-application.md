@@ -164,14 +164,20 @@ state. Notification permission and precise-timing readiness are visible in
 Settings.
 
 Android uses the Google Play services Activity Recognition Transition API as a
-low-power activity-evidence source. Detection is registered only while at least
-one enabled occurrence is within its actionable early/late window and still
-inactive. A latest
-`WALKING` or `RUNNING` enter transition applies accepted evidence to every such
+low-power activity-evidence source. With permission and compatible Play services,
+detection remains registered continuously for diagnostic collection, including
+after activity is accepted and outside medication windows. Only while at least
+one enabled occurrence is actionable and inactive does a latest
+`WALKING` or `RUNNING` enter transition apply accepted evidence to every such
 occurrence. Exits, stillness, cycling, vehicle travel, generic `ON_FOOT`, device
 unlock, and notification interaction do not count. The Transition API performs
 the sensor classification; Dose Goose does not run a foreground service or
-store raw sensor samples or an activity history.
+store raw sensor samples. It retains complete transition batches, original event
+timestamps, receipt wall/elapsed times and boot count, callback-time charging
+state, and processing outcomes in app-private JSONL files excluded from backup.
+Four rotating files of at most 1 MiB each bound disk use; the oldest history is
+discarded. This temporary continuous subscription is intended to diagnose false
+activity triggers and will be reconsidered after collecting evidence.
 
 API 29 and newer request `ACTIVITY_RECOGNITION` only from an explicit Settings
 action; API 26 through 28 use the legacy Google Play services manifest
@@ -179,8 +185,10 @@ permission. Missing permission, unavailable Play services, or registration
 failure leaves regular due reminders operational and is shown in Settings. The
 shell reconstructs registration after process start, foreground entry, reboot,
 package replacement, clock changes, and reminder-policy boundaries. Because
-registration begins when the early-taking window opens, someone already walking
-at that boundary may not generate a new enter transition. A persisted device
+transitions report changes rather than repeated samples, someone already walking
+at an early-window boundary may not generate a new enter transition. Diagnostic
+events outside an actionable window do not accept activity or reset sleep
+evidence. A persisted device
 activity latch avoids that false negative after activity has previously been
 accepted; otherwise the initial policy waits for an unambiguous transition.
 
@@ -198,7 +206,8 @@ configurable window (default 8:00 PM through noon) count, high-confidence sleep
 classifications must continue for two hours, qualifying classifications may be
 at most 30 minutes apart, and strong awake evidence restarts the interval.
 Short ambiguous readings do not immediately discard a candidate. A walking or
-running enter transition clears any pending sleep candidate and advances its
+running enter accepted for an actionable inactive dose clears any pending sleep
+candidate and advances its
 processed-event watermark so a delayed older batch cannot clear fresh activity.
 
 Confirmed sleep clears only the device-level activity latch. It does not alter
