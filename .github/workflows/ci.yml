@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5
         with:
           install_args: --locked --dry-run
           cache: false
@@ -37,7 +37,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5
         with:
           install_args: python uv pipx:pre-commit
 
@@ -97,7 +97,7 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
 
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5
         with:
           install_args: cargo:mdbook
 
@@ -114,7 +114,7 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2
 
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5
         with:
           install_args: aqua:EmbarkStudios/cargo-deny
 
@@ -138,7 +138,7 @@ jobs:
         with:
           target: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android, x86_64-linux-android
 
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5
         with:
           install_args: cargo:cargo-ndk
 
