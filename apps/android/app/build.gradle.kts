@@ -93,7 +93,11 @@ val buildRustAndroid = tasks.register<Exec>("buildRustAndroid") {
 
 android {
     namespace = "net.fstab.dosegoose"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
     ndkVersion = "30.0.16248370"
 
     defaultConfig {
