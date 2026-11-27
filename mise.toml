@@ -6,7 +6,7 @@ http_timeout = "120s"
 python = "3.14.10"
 uv = "0.13.10"
 "pipx:pre-commit" = "4.7.0"
-"aqua:EmbarkStudios/cargo-deny" = "0.22.1"
+"aqua:EmbarkStudios/cargo-deny" = "0.22.2"
 "github:nextest-rs/nextest" = { version = "0.9.152", version_prefix = "cargo-nextest-" }
 "cargo:mdbook" = "0.5.4"
 "cargo:cargo-ndk" = "4.1.2"
